@@ -10,7 +10,7 @@
 // *
 // * DFS
 // * BFS
-// * Greedy Best-first search
+// * GreedyWithMemory Best-first search
 // * A* search
 // * Uniform Cost Search
 // *
@@ -26,7 +26,7 @@
 //
 //
 //
-//    /*Greedy-First Search Algorithm that takes a Maze (by reference) in as a parameter.
+//    /*GreedyWithMemory-First Search Algorithm that takes a Maze (by reference) in as a parameter.
 //     *The Maze class is defined in maze.java
 //     */
 //    public static void GreedySearch(Maze maze) {

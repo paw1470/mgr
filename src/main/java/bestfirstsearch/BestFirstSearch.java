@@ -1,6 +1,7 @@
-package greedy;
+package bestfirstsearch;
 
 
+import greedy.Point;
 import utils.Map;
 import utils.Pair;
 import utils.PointState;
@@ -10,7 +11,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.PriorityQueue;
 
-public class Greedy {
+public class BestFirstSearch {
     private int mapSizeX;
     private int mapSizeY;
     private Point start;
@@ -21,7 +22,7 @@ public class Greedy {
     private PriorityQueue<Point> pointPriorityQueue;
     private int lengthMultiplier = 100;
 
-    public Greedy(Map map, Pair start, Pair end, boolean diagonals) {
+    public BestFirstSearch(Map map, Pair start, Pair end, boolean diagonals) {     //greedy który unika ścieżki po której już chodził
         this.map = map;
         this.mapSizeX = map.getXSize();
         this.mapSizeY = map.getYSize();
@@ -83,7 +84,6 @@ public class Greedy {
         int valueToThis = 0;
         while ((!pointPriorityQueue.isEmpty()) && (counter > 0)) {
             Point now = pointPriorityQueue.remove();
-            clearQueue();
             System.out.println(now);
             if (now.getState() == PointState.END) {
                 return true;
@@ -171,7 +171,8 @@ public class Greedy {
 
     private void addPointToQueue(Point now, Point parent) {
         if (now.getState() == PointState.WALL) {
-
+        } else if(now.getState() == PointState.VISITED){
+        } else if(now.getState() == PointState.ADDED){
         } else {
             if (now.getState() == PointState.FREE) {
                 now.setState(PointState.ADDED);
