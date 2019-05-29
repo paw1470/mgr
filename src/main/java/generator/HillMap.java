@@ -1,21 +1,21 @@
-package utils;
+package generator;
 
 import lombok.Getter;
+import utils.Coordinate;
+import utils.Map;
 
-public class Map {
+public class HillMap {
     @Getter
     private int xSize;
 
     @Getter
     private int ySize;
-    private int[][] map;
+    private double[][] map;
 
-    private final int WALL_HEIGHT = 999999;
-
-    public Map(int xSize, int ySize) {
+    public HillMap(int xSize, int ySize) {
         this.xSize = xSize;
         this.ySize = ySize;
-        map = new int[ySize][xSize];
+        map = new double[ySize][xSize];
     }
 
     public void clear() {
@@ -26,7 +26,7 @@ public class Map {
         }
     }
 
-    public int getFieldValue(Coordinate coordinate) {
+    public double getFieldValue(Coordinate coordinate) {
         if (isInMap(coordinate)) {
             return map[coordinate.getY()][coordinate.getX()];
         } else {
@@ -34,7 +34,7 @@ public class Map {
         }
     }
 
-    public void setFieldValue(Coordinate coordinate, int value) {
+    public void setFieldValue(Coordinate coordinate, double value) {
         if (isInMap(coordinate)) {
             map[coordinate.getY()][coordinate.getX()] = value;
         } else {
@@ -42,9 +42,14 @@ public class Map {
         }
     }
 
-
-    public void setWall(Coordinate coordinate) {
-        map[coordinate.getY()][coordinate.getX()] = WALL_HEIGHT;
+    public Map getMapInt(int height) {
+        Map mapInt = new Map(xSize, ySize);
+        for (int y = 0; y < ySize - 1; y++) {
+            for (int x = 0; x < xSize - 1; x++) {
+                mapInt.setFieldValue(new Coordinate(x, y), (int) (map[y][x] * height));
+            }
+        }
+        return mapInt;
     }
 
     @Override

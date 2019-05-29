@@ -1,18 +1,19 @@
-package greedy;
+package alg;
 
-import utils.Pair;
+import utils.Coordinate;
 import utils.PointState;
 
 public class Point implements Comparable<Point> {
-    private Pair pair;
+    private Coordinate coordinate;
     private Point parent;
     private PointState state;
     private int valueToThisPoint;
     private int valueToEndPoint;
 
-    public Point(Pair pair) {
-        this.pair = pair;
+    public Point(Coordinate coordinate) {
+        this.coordinate = coordinate;
         this.state = PointState.FREE;
+        parent = null;
     }
 
     public Point getParent() {
@@ -31,8 +32,8 @@ public class Point implements Comparable<Point> {
         this.state = state;
     }
 
-    public Pair getPair() {
-        return pair;
+    public Coordinate getCoordinate() {
+        return coordinate;
     }
 
     public int getValueToThisPoint() {
@@ -70,15 +71,15 @@ public class Point implements Comparable<Point> {
     public String toString() {
         if (parent != null) {
             return "Point{" +
-                    "pair=" + pair +
-                    ", parent=" + parent.getPair() +
+                    "coordinate=" + coordinate +
+                    ", parent=" + parent.getCoordinate() +
                     ", state=" + state +
                     ", valueToThisPoint=" + valueToThisPoint +
                     ", valueToEndPoint=" + valueToEndPoint +
                     '}';
         } else {
             return "Point{" +
-                    "pair=" + pair +
+                    "coordinate=" + coordinate +
                     ", state=" + state +
                     ", valueToThisPoint=" + valueToThisPoint +
                     ", valueToEndPoint=" + valueToEndPoint +
