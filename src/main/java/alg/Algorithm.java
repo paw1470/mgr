@@ -17,10 +17,12 @@ public class Algorithm {
     private Point[][] points;
     private PriorityQueue<Point> pointPriorityQueue;
     private int lengthMultiplier = 100;
-    Algorithms algorithm;
-    int visitedCounter;
-    int calculateCounter;
-    boolean found;
+    private Algorithms algorithm;
+    private int visitedCounter;
+    private int calculateValueCounter;
+    private boolean found;
+    private int checkNeighborsCounter;
+    private int maxSizeQueue;
 
     public Algorithm(Map map, Coordinate start, Coordinate end, boolean diagonals, Algorithms algorithm) {
         this.map = map;
@@ -45,14 +47,18 @@ public class Algorithm {
         if (start.equals(end)) {
             throw new IllegalArgumentException("Start and End cannot be the same point");
         }
-        points[start.getY()][start.getX()].setState(PointState.START);
-        points[start.getY()][start.getX()].setValueToThisPoint(0);
-        points[end.getY()][end.getX()].setState(PointState.END);
-
         this.start = points[start.getY()][start.getX()];
         this.end = points[end.getY()][end.getX()];
+
+        this.start.setState(PointState.START);
+        this.start.setParent(null);
+        this.start.setValueToThisPoint(0);
+        this.end.setState(PointState.END);
+
+
         this.diagonals = diagonals;
         this.algorithm = algorithm;
+        findWalls(map.getWALL_HEIGHT());
     }
 
     public void setLengthMultiplier(int lengthMultiplier) {
@@ -70,14 +76,14 @@ public class Algorithm {
     }
 
     private int calculateValue3D(Point p1, Point p2) {
-        calculateCounter++;
+        calculateValueCounter++;
         return (int) Math.sqrt(Math.pow((p2.getCoordinate().getX() - p1.getCoordinate().getX()) * lengthMultiplier, 2) +
                 Math.pow((p2.getCoordinate().getY() - p1.getCoordinate().getY()) * lengthMultiplier, 2) +
                 Math.pow(map.getFieldValue(p2.getCoordinate()) - map.getFieldValue(p1.getCoordinate()), 2));
     }
 
     private int calculateValue2D(Point p1, Point p2) {
-        calculateCounter++;
+        calculateValueCounter++;
         return (int) Math.sqrt(Math.pow((p2.getCoordinate().getX() - p1.getCoordinate().getX()) * lengthMultiplier, 2) +
                 Math.pow((p2.getCoordinate().getY() - p1.getCoordinate().getY()) * lengthMultiplier, 2));
     }
@@ -85,36 +91,40 @@ public class Algorithm {
     public boolean search() {
         System.out.println(algorithm);
         visitedCounter = 0;
-        calculateCounter = 0;
+        calculateValueCounter = 0;
+        checkNeighborsCounter = 0;
+        maxSizeQueue = 0;
         pointPriorityQueue.add(start);
-        int valueToThis = 0;
         while (!pointPriorityQueue.isEmpty()) {
+            if (maxSizeQueue < pointPriorityQueue.size()) {
+                maxSizeQueue = pointPriorityQueue.size();
+            }
             Point bestPoint = pointPriorityQueue.remove();
+            System.out.println(bestPoint);
             visitedCounter++;
             if (isGreedy() || isGreedyWithMemory()) {
                 clearQueue();
+                if (isPointVisited(bestPoint)) {
+                    System.out.println("Zapetlenie");
+                    return false;
+                }
             }
-            System.out.println(bestPoint);
-            if (bestPoint.getState() == PointState.END) {
+            if (isPointAdded(bestPoint)) {
+                bestPoint.setState(PointState.VISITED);
+            } else if (isPointEnd(bestPoint)) {
                 System.out.println("Znaleziony");
-//                System.out.println(getPath());
                 found = true;
                 return true;
-            } else if (bestPoint.getState() == PointState.START && valueToThis > 0) {    //alg jezeli wroci na start to znaczy ze juz nigdy nie trafi
+            } else if (isPointStart(bestPoint) && visitedCounter > 1) {    //alg jezeli wroci na start to znaczy ze juz nigdy nie trafi
                 System.out.println("Zapetlenie do start");
                 return false;
-            } else if (bestPoint.getState() == PointState.VISITED) {
-                System.out.println("Zapetlenie");
-                return false;
-            }
-            if (bestPoint.getState() == PointState.ADDED) {
-                bestPoint.setState(PointState.VISITED);
             }
             checkNeighbors(bestPoint);
         }
         System.out.println("Brak przejścia");
         return false;
     }
+
 
     private void clearQueue() {
         Point point;
@@ -141,7 +151,19 @@ public class Algorithm {
         return pathList;
     }
 
+    public String getPathToEndString() {
+        List<Point> pathList = getPathToEnd();
+        StringBuilder stringBuilder = new StringBuilder();
+        int i = 1;
+        for (Point p : pathList) {
+            stringBuilder.append(i + ". x=" + p.getCoordinate().getX() + " y=" + p.getCoordinate().getY() + " Start:" + p.getValueToThisPoint() + " End:" + p.getValueToEndPoint() + "\n");
+            i++;
+        }
+        return stringBuilder.toString();
+    }
+
     private void checkNeighbors(Point currentPoint) {
+        checkNeighborsCounter++;
         int x = currentPoint.getCoordinate().getX();
         int y = currentPoint.getCoordinate().getY();
         Point pointNew;
@@ -187,6 +209,9 @@ public class Algorithm {
 
     private boolean addPointToQueue(Point newPoint, Point bestPoint) {
         if (isPointWall(newPoint)) {
+            System.out.println("wall");
+            return false;
+        } else if (isPointStart(newPoint)) {
             return false;
         }
         if (isGreedy()) {
@@ -207,6 +232,7 @@ public class Algorithm {
                 int c = bestPoint.getValueToThisPoint() + calculateValue3D(newPoint, bestPoint);
                 if (c < newPoint.getValueToThisPoint()) {
                     newPoint.setValueToThisPoint(c);
+                    newPoint.setParent(bestPoint);
                 }
                 return false;
             }
@@ -253,10 +279,48 @@ public class Algorithm {
         return point.getState() == PointState.ADDED;
     }
 
+    private boolean isPointEnd(Point bestPoint) {
+        return bestPoint.getState() == PointState.END;
+    }
+
+    private boolean isPointStart(Point bestPoint) {
+        return bestPoint.getState() == PointState.START;
+    }
+
     private boolean isPointVisited(Point point) {
         return point.getState() == PointState.VISITED;
     }
 
+    public int getVisitedCounter() {
+        return visitedCounter;
+    }
+
+    public int getCalculateValueCounter() {
+        return calculateValueCounter;
+    }
+
+    public int getCheckNeighborsCounter() {
+        return checkNeighborsCounter;
+    }
+
+    public int getMaxSizeQueue() {
+        return maxSizeQueue;
+    }
+
+    public Algorithms getAlgorithm() {
+        return algorithm;
+    }
+
+    public void infoOAlg() {
+        System.out.println();
+        System.out.println("Info o " + getAlgorithm());
+        System.out.println("Max rozmiar kolejki " + getMaxSizeQueue());
+        System.out.println("Ile razy liczył odległość " + getCalculateValueCounter());
+        System.out.println("Odwiedzone punkty " + getVisitedCounter());
+        System.out.println("Ile razy sprawdzał dostępność sąsiadów " + getCheckNeighborsCounter());
+        System.out.println("Punkty na ścieżce " + getPathToEnd().size());
+        System.out.println();
+    }
 }
 
 

@@ -26,6 +26,18 @@ public class Map {
         }
     }
 
+    public void setMapFrom09(int[][] map, int wallHeight, int multiplier) {
+        for (int y = 0; y < ySize; y++) {
+            for (int x = 0; x < xSize; x++) {
+                if (map[y][x] == wallHeight) {
+                    this.map[y][x] = WALL_HEIGHT;
+                } else {
+                    this.map[y][x] = map[y][x] * multiplier;
+                }
+            }
+        }
+    }
+
     public int getFieldValue(Coordinate coordinate) {
         if (isInMap(coordinate)) {
             return map[coordinate.getY()][coordinate.getX()];
@@ -65,5 +77,9 @@ public class Map {
 
     private boolean isInMap(Coordinate coordinate) {
         return (coordinate.getX() < xSize && coordinate.getY() < ySize);
+    }
+
+    public int getWALL_HEIGHT() {
+        return WALL_HEIGHT;
     }
 }
